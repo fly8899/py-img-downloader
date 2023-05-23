@@ -16,7 +16,7 @@ def parse_text_file_for_image_links(file, encoding = "utf-8"):
         matches = extractor.find_urls(line)
         
         for url in matches:
-            if (url.endswith(".png") or url.endswith(".jpg")):
+            if (url.endswith(".png") or url.endswith(".jpg")) or url.endswith(".jpeg"):
                 urls.add(url)
 
     return urls
