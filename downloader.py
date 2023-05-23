@@ -1,6 +1,7 @@
 import requests
 import time
 import os
+import sys
 import concurrent.futures
 from urlextract import URLExtract
 
@@ -48,9 +49,12 @@ def download_and_persist_image(url):
     except:
         print("Skipping.")
     
-def main(website_target_url: str):
-
+def main():
     print("Checking setup.")
+
+    if not sys.argv[1:]:
+        print("No arguments passed.")
+        return
 
     if os.path.exists(image_directory):
         print("Skipping folder creation.")
@@ -58,6 +62,8 @@ def main(website_target_url: str):
         print("Creating images folder.")
         os.mkdir(image_directory)
 
+    website_target_url = sys.argv[1:].pop(0)
+    print(website_target_url)   
     print("Connecting to: " + website_target_url)
 
     website_text = get_response(website_target_url).text
@@ -73,7 +79,7 @@ def main(website_target_url: str):
 
     executor.shutdown()
 
-    print("Done..")
+    print("Done.")
     return 0
 
-main("fill in your website like https://www.yourwebsite.com")
+main()
