@@ -80,6 +80,5 @@ def main():
     executor.shutdown()
 
     print("Done.")
-    return 0
 
 main()
