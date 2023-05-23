@@ -1,7 +1,10 @@
 import requests
 import time
+import os
 import concurrent.futures
 from urlextract import URLExtract
+
+image_directory = "images"
 
 def parse_text_file_for_image_links(file, encoding = "utf-8"): 
     urls = set()
@@ -34,17 +37,26 @@ def get_response(url):
     return requests.get(url)
 
 def get_image_name():
-    return 'images/' + str(time.time()) + '.jpg'
+    return image_directory + '/' + str(time.time()) + '.jpg'
 
 def download_and_persist_image(url):
+    print("Trying: " + url)
     try: 
         bytes = get_response(url).content
         write_file(get_image_name(), bytes, "wb")
-        print("Added image.")
+        print("Success.")
     except:
-        print("Skipping invalid url.")
+        print("Skipping.")
     
 def main(website_target_url: str):
+
+    print("Checking setup.")
+
+    if os.path.exists(image_directory):
+        print("Skipping folder creation.")
+    else: 
+        print("Creating images folder.")
+        os.mkdir(image_directory)
 
     print("Connecting to: " + website_target_url)
 
