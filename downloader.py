@@ -24,10 +24,6 @@ def parse_text_file_for_image_links(file, encoding = "utf-8"):
 # str = "w", encoding = "utf-8"
 # bytes = "wb"
 def write_file(name, content, mode, encoding = None):
-    # force new_line. (html)
-    if (content is str):
-        content = content.replace("/>", "\n")
-
     file = open(name, mode, encoding = encoding)
     file.write(content)
     file.close()
