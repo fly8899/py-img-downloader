@@ -6,6 +6,9 @@ import concurrent.futures
 from urlextract import URLExtract
 
 image_directory = "images"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
+}
 
 def parse_text_file_for_image_links(file, encoding = "utf-8"): 
     urls = set()
@@ -31,7 +34,7 @@ def write_file(name, content, mode, encoding = None):
 # .content = image bytes
 # .text = website str
 def get_response(url):
-    return requests.get(url)
+    return requests.get(url, headers=headers)
 
 def get_image_name():
     return image_directory + '/' + str(time.time()) + '.jpg'
