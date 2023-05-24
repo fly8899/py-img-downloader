@@ -59,7 +59,6 @@ def main():
         os.mkdir(image_directory)
 
     website_target_url = sys.argv[1:].pop(0)
-    print(website_target_url)   
     print("Connecting to: " + website_target_url)
 
     website_text = get_response(website_target_url).text
