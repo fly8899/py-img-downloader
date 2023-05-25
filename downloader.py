@@ -77,7 +77,7 @@ def main():
     write_file(website_text_file_name, website_text, "w", utf)
     urls = parse_text_file_for_image_urls(website_text_file_name)
     
-    threadpool.map(download_and_persist_image, urls, timeout=10)
+    threadpool.map(download_and_persist_image, urls)
     threadpool.shutdown(wait = True)
 
     print("Done.")
