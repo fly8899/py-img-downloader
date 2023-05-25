@@ -1,52 +1,59 @@
 import requests
-import time
 import os
 import sys
 import concurrent.futures
 from urlextract import URLExtract
+import uuid 
 
+threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=20)
 image_directory = "images"
+utf = "utf-32"
 headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
 }
 
-def parse_text_file_for_image_links(file, encoding = "utf-8"): 
-    urls = set()
+def is_img_url(url: str) -> bool:
+    return url.endswith(".png") or url.endswith(".jpg") or url.endswith(".jpeg") or url.endswith(".svg")
+
+def parse_text_file_for_image_urls(file, encoding = utf) -> set[str]: 
     extractor = URLExtract()
     lines = open(file, encoding = encoding).readlines()
+    result = set()
+    iter = threadpool.map(extractor.find_urls, lines)
+    
+    for list in iter:
+        for valid_url in [url for url in list if is_img_url(url)]:
+            result.add(valid_url)
 
-    for line in lines:
-        matches = extractor.find_urls(line)
-        
-        for url in matches:
-            if (url.endswith(".png") or url.endswith(".jpg")) or url.endswith(".jpeg"):
-                urls.add(url)
+    return result
 
-    return urls
-
-# str = "w", encoding = "utf-8"
-# bytes = "wb"
-def write_file(name, content, mode, encoding = None):
+def write_file(name: str, content: str, mode: str, encoding: str = None):
     file = open(name, mode, encoding = encoding)
     file.write(content)
+    file.flush()
+    os.fsync(file.fileno())
     file.close()
 
-# .content = image bytes
-# .text = website str
-def get_response(url):
+def get_response(url: str) -> requests.Response:
     return requests.get(url, headers=headers)
 
-def get_image_name():
-    return image_directory + '/' + str(time.time()) + '.jpg'
+def get_random_string() -> str:
+    return uuid.uuid4().hex[:20].upper()
 
-def download_and_persist_image(url):
-    print("Trying: " + url)
-    try: 
+def get_file_type(url: str) -> str:
+    return url[::-1].split(".", maxsplit = 1).pop(0)[::-1]
+
+def get_image_name(file_type: str) -> str:
+    return image_directory + '/' + get_random_string() + '.' + file_type
+
+def download_and_persist_image(url: str):
+    try:
         bytes = get_response(url).content
-        write_file(get_image_name(), bytes, "wb")
-        print("Success.")
+        file_type = get_file_type(url)
+        write_file(get_image_name(file_type), bytes, "wb")
+        print("Saved: " + url)
     except:
-        print("Skipping.")
+        print("Skipping: " + url)
     
 def main():
     print("Checking setup.")
@@ -67,15 +74,11 @@ def main():
     website_text = get_response(website_target_url).text
     website_text_file_name = "page_content.txt"
 
-    write_file(website_text_file_name, website_text, "w", "utf-8")
-    urls = parse_text_file_for_image_links(website_text_file_name)
-
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
-
-    for url in urls:
-        executor.submit(download_and_persist_image(url))
-
-    executor.shutdown()
+    write_file(website_text_file_name, website_text, "w", utf)
+    urls = parse_text_file_for_image_urls(website_text_file_name)
+    
+    threadpool.map(download_and_persist_image, urls, timeout=10)
+    threadpool.shutdown(wait = True)
 
     print("Done.")
 
