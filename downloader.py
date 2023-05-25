@@ -7,7 +7,7 @@ import uuid
 
 threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=20)
 image_directory = "images"
-utf = "utf-32"
+utf = "utf-16"
 headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
 }
